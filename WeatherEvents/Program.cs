@@ -1,5 +1,7 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics;
-
+using WeatherEvents.Validators;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -12,6 +14,10 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+// Add FluentValidation to the services
+builder.Services.AddValidatorsFromAssemblyContaining<CreateWeatherEventRequestValidator>();
 
 var app = builder.Build();
 
@@ -29,6 +35,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UsePathBase("/swagger");
 
 app.UseHttpsRedirection();
 
