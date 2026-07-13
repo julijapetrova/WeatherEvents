@@ -40,6 +40,6 @@ public class CreateWeatherEventRequestValidator : AbstractValidator<WeatherEvent
         // SequenceNumber validation
         RuleFor(x => x.SequenceNumber)
             .NotEmpty().WithMessage("Sequence number is required.")
-            .GreaterThan(0).WithMessage("Sequence number must be a positive integer.");
+            .Length(1, 100).WithMessage("Sequence number must be between 1 and 100 characters.");
     }
 }

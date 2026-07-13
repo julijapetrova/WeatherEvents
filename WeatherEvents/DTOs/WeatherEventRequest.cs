@@ -28,7 +28,8 @@ public class WeatherEventRequest
         ErrorMessage = "Wind speed must be between 0 km/h and 300 km/h")]
     public decimal WindSpeed { get; set; }
 
-    [Range(1, long.MaxValue,
-        ErrorMessage = "Sequence number must be a positive integer")]
-    public long SequenceNumber { get; set; }
+    [Required(ErrorMessage = "SequenceNumber is required")]
+    [StringLength(100, MinimumLength = 1,
+        ErrorMessage = "SequenceNumber must be between 1 and 100 characters")]
+    public string SequenceNumber { get; set; } = string.Empty;
 }
