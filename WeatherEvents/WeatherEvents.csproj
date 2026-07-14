@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="docs\journal\" />
     <Folder Include="docs\adr\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
