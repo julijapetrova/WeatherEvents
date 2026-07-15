@@ -22,6 +22,7 @@ namespace WeatherEvents.Tests.Helpers
                  .Options;
             var context = new WeatherReadingDbContext(options);
 
+            await context.Database.EnsureDeletedAsync();
             await context.Database.MigrateAsync();
 
             return context;

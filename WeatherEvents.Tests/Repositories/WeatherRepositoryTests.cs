@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using FluentAssertions;
+using Newtonsoft.Json.Linq;
 using WeatherEvents.Models;
 using WeatherEvents.Repositories;
 using WeatherEvents.Tests.Helpers;
@@ -19,43 +20,57 @@ namespace WeatherEvents.Tests.Repositories
 
                 StationId = "StationId123",
                 Timestamp = System.DateTime.Parse("2026-07-15T15:46:56.959Z"),
-                Temperature = 100,
-                Humidity = 100,
-                Pressure = 1200,
-                WindSpeed = 300,
+                Temperature = 22.5M,
+                Humidity = 65,
+                Pressure = 1013,
+                WindSpeed = 12,
                 SequenceNumber = "SequenceNumber123"
 
             };
             // Act
-            var weatherEvent = await repository.AddReadingAsync(reading);
+            var result = await repository.AddReadingAsync(reading);
+
+            var savedReading =
+            await context.WeatherEvents.FindAsync(result.Id);
             // Assert
 
             //The returned entity is not null.
-            Assert.False(weatherEvent == null);
+            result.Should().NotBeNull();
             //An ID is assigned(if database - generated).
-            Assert.False(weatherEvent.Id == null);
+            result.Id.Should().BeGreaterThan(0);
             //The row exists in the database.
-
+            savedReading.Should().NotBeNull();
             //The saved values match what you passed in.
-            Assert.Equal(reading.SequenceNumber, weatherEvent.SequenceNumber);
+            savedReading!.SequenceNumber.Should()
+            .Be(reading.SequenceNumber);
         }
         [Fact]
         public async Task GetReadingAsync_ShouldReturnReading_WhenReadingExists()
-        {
-            /*
-                Arrange:
+        {            // Arrange
 
-                Seed a reading into the database.
+            await using var context = await DbContextFactory.Create();
+            var repository = new WeatherRepository(context);
+            var reading = new WeatherEvent
+            {
+                StationId = "StationId123",
+                Timestamp = System.DateTime.Parse("2026-07-15T15:46:56.959Z"),
+                Temperature = 22.5M,
+                Humidity = 65,
+                Pressure = 1013,
+                WindSpeed = 12,
+                SequenceNumber = "SequenceNumber123"
+            };
+            context.WeatherEvents.Add(reading);
+            await context.SaveChangesAsync();
+            // Act
+            var result = await repository.GetReadingAsync(reading.Id);
 
-                Act:
-
-                Call GetReadingAsync(id).
-
-                Assert:
-
-                The returned entity is not null.
-                The values are correct.
-             */
+            // Assert
+            //The returned entity is not null.
+            result.Should().NotBeNull();
+            //The values are correct.
+            result.StationId.Should().Be(reading.StationId);
+            result.SequenceNumber.Should().Be(reading.SequenceNumber);
         }
         [Fact]
         public async Task GetReadingAsync_ShouldReturnNull_WhenReadingDoesNotExist()
