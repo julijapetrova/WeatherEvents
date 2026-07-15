@@ -3,6 +3,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using WeatherEvents.Data;
+using WeatherEvents.Repositories;
 using WeatherEvents.Validators;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register the repository
+builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
+
 // Add FluentValidation to the services
 builder.Services.AddValidatorsFromAssemblyContaining<CreateWeatherEventRequestValidator>();
 
@@ -36,7 +40,6 @@ logger.LogInformation(
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-
     app.UseSwagger();
     app.UseSwaggerUI();
 }

@@ -9,7 +9,8 @@
       "applicationUrl": "http://localhost:5218",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "browser": "Chrome"
     },
     "https": {
       "commandName": "Project",
@@ -19,7 +20,8 @@
       "applicationUrl": "https://localhost:7259;http://localhost:5218",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "browser": "Chrome"
     }
   }
 }
