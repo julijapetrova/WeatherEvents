@@ -10,7 +10,7 @@ using WeatherEvents.Data;
 
 namespace WeatherEvents.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(WeatherReadingDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

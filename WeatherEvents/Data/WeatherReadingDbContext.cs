@@ -3,17 +3,15 @@ using WeatherEvents.Models;
 
 namespace WeatherEvents.Data;
 
-public class AppDbContext : DbContext
+public class WeatherReadingDbContext : DbContext
 {
     // Constructor to accept DbContextOptions
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    public WeatherReadingDbContext(DbContextOptions<WeatherReadingDbContext> options) : base(options)
     {
     }
 
-    // DbSet for your WeatherEvent model
     public DbSet<WeatherEvent> WeatherEvents { get; set; }
 
-    // Optional: Configure model relationships or constraints here
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Configure Id as the primary key (auto-generated)

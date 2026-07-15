@@ -19,7 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add DbContext to the service container
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<WeatherReadingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register the repository

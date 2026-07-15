@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using WeatherEvents.Data;
 using WeatherEvents.Models;
 
@@ -6,12 +7,12 @@ namespace WeatherEvents.Repositories
 {
     public class WeatherRepository : IWeatherRepository
     {
-        private readonly AppDbContext _context;
+        private readonly WeatherReadingDbContext _context;
         private readonly ILogger<WeatherRepository> _logger;
-        public WeatherRepository(AppDbContext context, ILogger<WeatherRepository> logger)
+        public WeatherRepository(WeatherReadingDbContext context, ILogger<WeatherRepository>? logger=null)
         {
             _context = context;
-            _logger = logger;
+            _logger = logger ?? NullLogger<WeatherRepository>.Instance; ;
         }
 
         public async Task<WeatherEvent> AddReadingAsync(WeatherEvent reading)

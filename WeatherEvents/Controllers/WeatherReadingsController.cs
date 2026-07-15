@@ -12,13 +12,13 @@ namespace WeatherEvents.Controllers;
 public class WeatherReadingsController : ControllerBase
 {
     private readonly IValidator<WeatherEventRequest> _validator;
-    private readonly AppDbContext _context;
+    private readonly WeatherReadingDbContext _context;
     private readonly ILogger<WeatherReadingsController> _logger;
     private readonly IWeatherRepository _repository;
 
     public WeatherReadingsController(
         IValidator<WeatherEventRequest> validator,
-        AppDbContext context,
+        WeatherReadingDbContext context,
         IWeatherRepository repository,
         ILogger<WeatherReadingsController> logger)
     {

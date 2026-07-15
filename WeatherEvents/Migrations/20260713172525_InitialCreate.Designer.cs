@@ -11,7 +11,7 @@ using WeatherEvents.Data;
 
 namespace WeatherEvents.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(WeatherReadingDbContext))]
     [Migration("20260713172525_InitialCreate")]
     partial class InitialCreate
     {
