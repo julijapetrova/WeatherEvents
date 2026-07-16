@@ -15,18 +15,8 @@ namespace WeatherEvents.Tests.Repositories
             // Arrange
             await using var context = await DbContextFactory.Create();
             var repository = new WeatherRepository(context);
-            var reading = new WeatherEvent
-            {
-
-                StationId = "StationId123",
-                Timestamp = System.DateTime.Parse("2026-07-15T15:46:56.959Z"),
-                Temperature = 22.5M,
-                Humidity = 65,
-                Pressure = 1013,
-                WindSpeed = 12,
-                SequenceNumber = "SequenceNumber123"
-
-            };
+            var reading = KnownGood.Reading();
+           
             // Act
             var result = await repository.AddReadingAsync(reading);
 
@@ -50,16 +40,8 @@ namespace WeatherEvents.Tests.Repositories
 
             await using var context = await DbContextFactory.Create();
             var repository = new WeatherRepository(context);
-            var reading = new WeatherEvent
-            {
-                StationId = "StationId123",
-                Timestamp = System.DateTime.Parse("2026-07-15T15:46:56.959Z"),
-                Temperature = 22.5M,
-                Humidity = 65,
-                Pressure = 1013,
-                WindSpeed = 12,
-                SequenceNumber = "SequenceNumber123"
-            };
+            var reading = KnownGood.Reading();
+
             context.WeatherEvents.Add(reading);
             await context.SaveChangesAsync();
             // Act

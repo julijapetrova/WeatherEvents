@@ -3,9 +3,9 @@ using WeatherEvents.DTOs;
 
 namespace WeatherEvents.Validators;
 
-public class CreateWeatherEventRequestValidator : AbstractValidator<WeatherEventRequest>
+public class WeatherEventRequestValidator : AbstractValidator<WeatherEventRequest>
 {
-    public CreateWeatherEventRequestValidator()
+    public WeatherEventRequestValidator()
     {
         // StationId validation
         RuleFor(x => x.StationId)
@@ -15,7 +15,7 @@ public class CreateWeatherEventRequestValidator : AbstractValidator<WeatherEvent
         // Timestamp validation
         RuleFor(x => x.Timestamp)
             .NotEmpty().WithMessage("Timestamp is required.")
-            .LessThanOrEqualTo(DateTime.Now).WithMessage("Timestamp cannot be in the future.");
+            .LessThanOrEqualTo(x => DateTime.Now).WithMessage("Timestamp cannot be in the future.");
 
         // Temperature validation
         RuleFor(x => x.Temperature)
