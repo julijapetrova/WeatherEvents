@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Newtonsoft.Json.Linq;
 using WeatherEvents.Models;
 using WeatherEvents.Repositories;
@@ -16,7 +18,7 @@ namespace WeatherEvents.Tests.Repositories
             await using var context = await DbContextFactory.Create();
             var repository = new WeatherRepository(context);
             var reading = KnownGood.Reading();
-           
+
             // Act
             var result = await repository.AddReadingAsync(reading);
 
@@ -57,19 +59,67 @@ namespace WeatherEvents.Tests.Repositories
         [Fact]
         public async Task GetReadingAsync_ShouldReturnNull_WhenReadingDoesNotExist()
         {
-            /*
-             * Arrange:
+            //Arrange:
+            await using var context = await DbContextFactory.Create();
+            var repository = new WeatherRepository(context);
+            var reading = KnownGood.Reading();
+            reading.Id = 0;
+            //Act:
+            var result = await repository.GetReadingAsync(reading.Id);
 
-Empty database.
-
-Act:
-
-await repository.GetReadingAsync(9999);
-
-Assert:
-
-result.Should().BeNull();
-             */
+            //Assert:
+            result.Should().BeNull();
         }
+
+        [Fact]
+        public async Task GetReadingAsync_ShouldReturnNull_WhenDatabaseIsEmpty()
+        {
+            //Arrange:
+            await using var context = await DbContextFactory.Create();
+            var repository = new WeatherRepository(context);
+
+            //Act:
+            var result = await repository.GetReadingAsync(1);
+
+            //Assert:
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task AddReadingAsync_ShouldReturnSavedEntityWithId()
+        {
+            //Arrange:
+            await using var context = await DbContextFactory.Create();
+            var repository = new WeatherRepository(context);
+            var reading = KnownGood.Reading();
+
+            //Act:
+            var result = await repository.AddReadingAsync(reading);
+
+            //Assert:
+            result.StationId.Should().Be(reading.StationId);
+            result.Id.Should().BeGreaterThan(0);
+
+        }
+        [Fact]
+        public async Task AddReadingAsync_ShouldThrowInvalidOperationException_WhenDbUpdateFails()
+        {
+            // Arrange
+            await using var context = await DbContextFactory.Create();
+            var repository = new WeatherRepository(context);
+
+            var reading = KnownGood.Reading();
+            // StationId exceeds MaxLength(50) defined in DbContext
+            reading.StationId = new string('A', 100);
+
+            // Act & Assert
+            await FluentActions.Awaiting(() => repository.AddReadingAsync(reading))
+                .Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("Failed to save the weather reading.");
+        }
+
     }
 }
+
+
+
