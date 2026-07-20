@@ -1,8 +1,4 @@
 ﻿using FluentAssertions;
-using Microsoft.Extensions.Logging;
-using Moq;
-using Newtonsoft.Json.Linq;
-using WeatherEvents.Models;
 using WeatherEvents.Repositories;
 using WeatherEvents.Tests.Helpers;
 
@@ -117,7 +113,6 @@ namespace WeatherEvents.Tests.Repositories
                 .Should().ThrowAsync<InvalidOperationException>()
                 .WithMessage("Failed to save the weather reading.");
         }
-
     }
 }
 
