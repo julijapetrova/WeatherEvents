@@ -13,3 +13,8 @@ The API is built with:
 - **FluentValidation** for request validation
 - **Swagger/OpenAPI** for API documentation
 - **Logging** for tracking events
+
+## Running with Docker
+
+bash docker-compose up --build
+Then visit http://localhost:5000/swagger
