@@ -16,5 +16,6 @@ The API is built with:
 
 ## Running with Docker
 
-bash docker-compose up --build
+`bash docker-compose up --build`
+
 Then visit http://localhost:5000/swagger
