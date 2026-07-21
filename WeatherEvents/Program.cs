@@ -27,7 +27,7 @@ builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
 
 // Add FluentValidation to the services
 builder.Services.AddValidatorsFromAssemblyContaining<WeatherEventRequestValidator>();
-
+builder.Configuration.AddEnvironmentVariables();
 var app = builder.Build();
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
