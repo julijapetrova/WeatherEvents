@@ -2,6 +2,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using WeatherEvents.Data;
 using WeatherEvents.Repositories;
 using WeatherEvents.Validators;
@@ -29,7 +30,22 @@ builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
 builder.Services.AddValidatorsFromAssemblyContaining<WeatherEventRequestValidator>();
 builder.Configuration.AddEnvironmentVariables();
 var app = builder.Build();
-
+// Auto - migrate database on startup
+try
+{
+    using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<WeatherReadingDbContext>();
+    Console.WriteLine("Attempting to migrate database...");
+    db.Database.Migrate(); // Creates DB + tables if they don't exist
+    Console.WriteLine("Database migration completed successfully.");
+}
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Database migration error: {ex.Message}");
+    // Don't throw 
+}
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 logger.LogInformation(
