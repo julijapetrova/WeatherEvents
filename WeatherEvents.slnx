@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="docker-compose.yml" />
+  </Folder>
   <Project Path="WeatherEvents.Tests/WeatherEvents.Tests.csproj" Id="1ff17578-0376-4ac9-b46e-e82c272c1792" />
   <Project Path="WeatherEvents/WeatherEvents.csproj" />
 </Solution>
