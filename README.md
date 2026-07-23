@@ -3,6 +3,13 @@
 ## What the Project Does
 **WeatherEvents** project is a **.NET 10.0** based **REST API** for processing weather station data. It allows users to:
 
+## Context Diagram
+```plaintext
++---------------------+       +---------------------+       +---------------------+
+|   Weather Station   |       |  WeatherEvents API  |       |       Client        |
+|  (External Source)  |------>|                     |------>|                     |
++---------------------+       +---------------------+       +---------------------+
+```
 - Submit weather readings (e.g., temperature, humidity, pressure, wind speed) from weather stations via a `POST /weather-readings` endpoint.
 - Retrieve weather readings by ID via a `GET /weather-readings/{id}` endpoint.
 - Validate incoming data using **FluentValidation** to ensure correctness (e.g., temperature range, humidity percentage, wind speed limits).
