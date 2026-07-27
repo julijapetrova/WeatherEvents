@@ -27,6 +27,7 @@ builder.Services.AddDbContext<WeatherReadingDbContext>(options =>
 
 // Queue needs to live for the lifetime of the application, therefore singleton
 builder.Services.AddSingleton<IWeatherEventQueue, InMemoryWeatherEventQueue>();
+builder.Services.AddSingleton<IDeadLetterQueue, InMemoryDeadLetterQueue>();
 
 builder.Services.AddHostedService<WeatherEventWorker>();
 // Register the repository

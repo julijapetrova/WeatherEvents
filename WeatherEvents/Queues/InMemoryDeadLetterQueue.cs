@@ -2,15 +2,13 @@
 
 namespace WeatherEvents.Queues
 {
-    public class InMemoryWeatherEventQueue : IWeatherEventQueue
+    public class InMemoryDeadLetterQueue : IDeadLetterQueue
     {
         private readonly Channel<WeatherEventWorkItem> _channel;
         private int _count;
 
-        public InMemoryWeatherEventQueue()
+        public InMemoryDeadLetterQueue()
         {
-            // Prevent unlimited memory usage if requests arrive
-            // faster than they can be processed.
             _channel = Channel.CreateBounded<WeatherEventWorkItem>(10000);
         }
 

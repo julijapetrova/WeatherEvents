@@ -1,6 +1,6 @@
 ﻿namespace WeatherEvents.Queues
 {
-    public interface IWeatherEventQueue
+    public interface IDeadLetterQueue
     {
         int Count { get; }
 

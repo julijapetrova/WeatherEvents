@@ -27,7 +27,6 @@ public class WeatherReadingsController : ControllerBase
         _repository = repository;
         _logger = logger;
         _queue = queue;
-
     }
 
     [HttpPost]
@@ -55,8 +54,12 @@ public class WeatherReadingsController : ControllerBase
         };
         try
         {
-            await _queue.EnqueueAsync(weatherEvent);
-           
+            await _queue.EnqueueAsync(new WeatherEventWorkItem
+            {
+                WeatherEvent = weatherEvent,
+                RetryCount = 0
+            });
+
             return Accepted();
         }
         catch (Exception ex)
