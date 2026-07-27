@@ -13,11 +13,11 @@ using Xunit.Abstractions;
 
 namespace WeatherEvents.Tests
 {
-    public class loadtest
+    public class Loadtest
     {
         private readonly ITestOutputHelper _output;
 
-        public loadtest(ITestOutputHelper output)
+        public Loadtest(ITestOutputHelper output)
         {
             _output = output;
         }

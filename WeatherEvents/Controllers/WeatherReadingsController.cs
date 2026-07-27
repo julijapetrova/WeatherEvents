@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WeatherEvents.Data;
 using WeatherEvents.DTOs;
 using WeatherEvents.Models;
+using WeatherEvents.Queues;
 using WeatherEvents.Repositories;
 
 namespace WeatherEvents.Controllers;
@@ -12,20 +13,21 @@ namespace WeatherEvents.Controllers;
 public class WeatherReadingsController : ControllerBase
 {
     private readonly IValidator<WeatherEventRequest> _validator;
-    private readonly WeatherReadingDbContext _context;
     private readonly ILogger<WeatherReadingsController> _logger;
     private readonly IWeatherRepository _repository;
+    private readonly IWeatherEventQueue _queue;
 
     public WeatherReadingsController(
         IValidator<WeatherEventRequest> validator,
-        WeatherReadingDbContext context,
         IWeatherRepository repository,
-        ILogger<WeatherReadingsController> logger)
+        ILogger<WeatherReadingsController> logger,
+        IWeatherEventQueue queue)
     {
         _validator = validator;
-        _context = context;
         _repository = repository;
         _logger = logger;
+        _queue = queue;
+
     }
 
     [HttpPost]
@@ -39,10 +41,8 @@ public class WeatherReadingsController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        // If validation passes, process the request (e.g., save to database)
         _logger.LogInformation($"Weather reading received from {request.StationId} at {request.Timestamp}");
 
-        // Map the DTO to the WeatherEvent model
         var weatherEvent = new WeatherEvent
         {
             StationId = request.StationId,
@@ -55,31 +55,9 @@ public class WeatherReadingsController : ControllerBase
         };
         try
         {
-            // Add to the repository
-            var createdEvent = await _repository.AddReadingAsync(weatherEvent);
-
-            // Log the event
-            _logger.LogInformation(
-                "Weather reading saved: StationId={StationId}, SequenceNumber={SequenceNumber}, Id={Id}",
-                createdEvent.StationId,
-                createdEvent.SequenceNumber,
-                createdEvent.Id);
-
-            // Return 201 (Created) with the created resource
-            return CreatedAtAction(
-                nameof(GetWeatherReading),
-                new { id = createdEvent.Id },
-                new
-                {
-                    createdEvent.Id,
-                    createdEvent.StationId,
-                    createdEvent.Timestamp,
-                    createdEvent.Temperature,
-                    createdEvent.Humidity,
-                    createdEvent.Pressure,
-                    createdEvent.WindSpeed,
-                    createdEvent.SequenceNumber
-                });
+            await _queue.EnqueueAsync(weatherEvent);
+           
+            return Accepted();
         }
         catch (Exception ex)
         {
@@ -88,7 +66,6 @@ public class WeatherReadingsController : ControllerBase
         }
     }
 
-    // Optional: Add a GET endpoint to retrieve a weather reading by ID
     [HttpGet("{id}")]
     public async Task<IActionResult> GetWeatherReading(long id)
     {

@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using WeatherEvents.Data;
+using WeatherEvents.Queues;
 using WeatherEvents.Repositories;
 using WeatherEvents.Validators;
+using WeatherEvents.Workers;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -23,6 +25,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<WeatherReadingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Queue needs to live for the lifetime of the application, therefore singleton
+builder.Services.AddSingleton<IWeatherEventQueue, InMemoryWeatherEventQueue>();
+
+builder.Services.AddHostedService<WeatherEventWorker>();
 // Register the repository
 builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
 
