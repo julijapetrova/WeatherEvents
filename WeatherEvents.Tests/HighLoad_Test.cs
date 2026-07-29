@@ -14,7 +14,8 @@ using Xunit.Abstractions;
 namespace WeatherEvents.Tests
 {
     public class Loadtest
-    {
+    {/*TODO: end-to-end flow (API → Queue → Worker → Database)
+      */
         private readonly ITestOutputHelper _output;
 
         public Loadtest(ITestOutputHelper output)
