@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using WeatherEvents.Data;
 using WeatherEvents.Queues;
 using WeatherEvents.Repositories;
+using WeatherEvents.Services;
 using WeatherEvents.Validators;
 using WeatherEvents.Workers;
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +33,13 @@ builder.Services.AddSingleton<IDeadLetterQueue, InMemoryDeadLetterQueue>();
 builder.Services.AddHostedService<WeatherEventWorker>();
 // Register the repository
 builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
+
+builder.Services.AddHttpClient<IDmiRadarApiClient, DmiRadarApiClient>(client =>
+{
+    var baseUrl = builder.Configuration["DmiRadarApi:BaseUrl"];
+    client.BaseAddress = new Uri(baseUrl ?? "https://opendataapi.dmi.dk/v1/radardata/");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 // Add FluentValidation to the services
 builder.Services.AddValidatorsFromAssemblyContaining<WeatherEventRequestValidator>();

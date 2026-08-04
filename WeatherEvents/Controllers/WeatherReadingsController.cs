@@ -5,6 +5,7 @@ using WeatherEvents.DTOs;
 using WeatherEvents.Models;
 using WeatherEvents.Queues;
 using WeatherEvents.Repositories;
+using WeatherEvents.Services;
 
 namespace WeatherEvents.Controllers;
 
@@ -17,16 +18,21 @@ public class WeatherReadingsController : ControllerBase
     private readonly IWeatherRepository _repository;
     private readonly IWeatherEventQueue _queue;
 
+    private readonly IDmiRadarApiClient _client;
+
     public WeatherReadingsController(
         IValidator<WeatherEventRequest> validator,
         IWeatherRepository repository,
         ILogger<WeatherReadingsController> logger,
-        IWeatherEventQueue queue)
+        IWeatherEventQueue queue,
+        IDmiRadarApiClient client)
     {
         _validator = validator;
         _repository = repository;
         _logger = logger;
         _queue = queue;
+        _client = client;
+
     }
 
     [HttpPost]
@@ -86,5 +92,37 @@ public class WeatherReadingsController : ControllerBase
             _logger.LogError(ex, "Failed to retrieve weather reading with ID {Id}.", id);
             return StatusCode(500, "An error occurred while retrieving the weather reading.");
         }
+    }
+    [HttpGet("test-scans")]
+    public async Task<IActionResult> TestScans()
+    {
+        var pastDate = new DateTime(2021, 8, 6, 7, 35, 0, DateTimeKind.Utc);
+        var scans = await _client.GetScansAsync(
+        pastDate.AddHours(-1),
+        pastDate.AddHours(1));
+
+
+        return Ok(scans.Select(s => new {
+            s.Id,
+            s.Properties.Datetime,
+            DownloadUrl = s.DownloadUrl,
+        }));
+    }
+
+    [HttpGet("rain-check")]
+    public async Task<IActionResult> RainCheck([FromQuery] double lat, [FromQuery] double lon)
+    {
+        var scan = await _client.GetLatestScanForPointAsync(lat, lon);
+
+        if (scan == null)
+            return NotFound("No scan covers this point");
+
+        return Ok(new
+        {
+            scan.Id,
+            scan.Properties.Datetime,
+            scan.Geometry?.Bbox,
+            DownloadUrl = scan.DownloadUrl
+        });
     }
 }
