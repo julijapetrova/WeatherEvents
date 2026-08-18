@@ -11,6 +11,7 @@ public class WeatherReadingDbContext : DbContext
     }
 
     public DbSet<WeatherEvent> WeatherEvents { get; set; }
+    public DbSet<RadarScan> RadarScans { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

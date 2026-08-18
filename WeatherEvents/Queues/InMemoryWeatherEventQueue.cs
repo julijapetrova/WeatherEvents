@@ -6,6 +6,7 @@ namespace WeatherEvents.Queues
     {
         private readonly Channel<WeatherEventWorkItem> _channel;
         private int _count;
+        public int Count => _count;
 
         public InMemoryWeatherEventQueue()
         {
@@ -14,7 +15,6 @@ namespace WeatherEvents.Queues
             _channel = Channel.CreateBounded<WeatherEventWorkItem>(10000);
         }
 
-        public int Count => _count;
 
         public ValueTask EnqueueAsync(WeatherEventWorkItem weatherEventWorkItem)
         {

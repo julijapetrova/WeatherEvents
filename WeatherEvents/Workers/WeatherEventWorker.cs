@@ -6,14 +6,14 @@ namespace WeatherEvents.Workers
     public class WeatherEventWorker : BackgroundService
     {
         private readonly IWeatherEventQueue _queue;
-        private readonly IDeadLetterQueue _deadLetterQueue;
+        private readonly IDeadLetterQueue<WeatherEventWorkItem> _deadLetterQueue;
         private readonly ILogger<WeatherEventWorker> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
 
         public WeatherEventWorker(
             IServiceScopeFactory scopeFactory,
             IWeatherEventQueue queue,
-            IDeadLetterQueue deadLetterQueue,
+            IDeadLetterQueue<WeatherEventWorkItem> deadLetterQueue,
             ILogger<WeatherEventWorker> logger)
         {
             _scopeFactory = scopeFactory;
@@ -27,7 +27,7 @@ namespace WeatherEvents.Workers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var workItem = await _queue.DequeueAsync(stoppingToken);
+                WeatherEventWorkItem workItem = await _queue.DequeueAsync(stoppingToken);
 
                 try
                 {
@@ -60,6 +60,8 @@ namespace WeatherEvents.Workers
                     }
                     else
                     {
+                        await _deadLetterQueue.EnqueueAsync(workItem);
+
                         _logger.LogError(
                           ex,
                           "Moved weather event {SequenceNumber} to dead-letter queue after {RetryCount} attempts. Main queue: {MainQueueCount}, Dead-letter queue: {DeadLetterCount}",

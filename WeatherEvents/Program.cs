@@ -28,16 +28,20 @@ builder.Services.AddDbContext<WeatherReadingDbContext>(options =>
 
 // Queue needs to live for the lifetime of the application, therefore singleton
 builder.Services.AddSingleton<IWeatherEventQueue, InMemoryWeatherEventQueue>();
-builder.Services.AddSingleton<IDeadLetterQueue, InMemoryDeadLetterQueue>();
+builder.Services.AddSingleton<IDmiRadarEventQueue, InMemoryDmiRadarEventQueue>();
+builder.Services.AddSingleton<IDeadLetterQueue<RadarScanWorkItem>, InMemoryDeadLetterQueue<RadarScanWorkItem>>();
+builder.Services.AddSingleton<IDeadLetterQueue<WeatherEventWorkItem>, InMemoryDeadLetterQueue<WeatherEventWorkItem>>();
 
 builder.Services.AddHostedService<WeatherEventWorker>();
-// Register the repository
+builder.Services.AddHostedService<DmiRadarWorker>();
+
 builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
+builder.Services.AddScoped<IRadarScanRepository, RadarScanRepository>();
 
 builder.Services.AddHttpClient<IDmiRadarApiClient, DmiRadarApiClient>(client =>
 {
     var baseUrl = builder.Configuration["DmiRadarApi:BaseUrl"];
-    client.BaseAddress = new Uri(baseUrl ?? "https://opendataapi.dmi.dk/v1/radardata/");
+    client.BaseAddress = new Uri(baseUrl ?? "https://opendataapi.dmi.dk/v1/radardata"); 
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 

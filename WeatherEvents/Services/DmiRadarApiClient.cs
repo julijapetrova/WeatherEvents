@@ -18,7 +18,7 @@ namespace WeatherEvents.Services
             _logger = logger ?? NullLogger<DmiRadarApiClient>.Instance;
             _httpClient = httpClient;
         }
-        public async Task<DmiRadarScanFeature?> GetLatestScanForPointAsync(double latitude, double longitude, string collectionName = "pseudoCappi")
+        public async Task<DmiRadarScanFeature?> GetLatestScanForPointAsync(double latitude = 0, double longitude = 0, string collectionName = "pseudoCappi")
         {
 
             // Get scans from the last 15 minutes
@@ -32,8 +32,8 @@ namespace WeatherEvents.Services
             }
             // Find the most recent scan whose bbox contains our point
             var matchingScan = scans
-                .Where(s => ContainsPoint(s.Geometry?.Bbox, latitude, longitude))
-                .OrderByDescending(s => s.Properties.Datetime)
+                //.Where(s => ContainsPoint(s.Geometry?.Bbox, latitude, longitude))
+                //.OrderByDescending(s => s.Properties.Datetime)
                 .FirstOrDefault();
 
             if (matchingScan == null)
@@ -69,12 +69,20 @@ namespace WeatherEvents.Services
         {
             try
             {
-                var datetimeRange = $"{startTime:yyyy-MM-ddTHH:mm:ssZ}/{endTime:yyyy-MM-ddTHH:mm:ssZ}";
-                //var requestPath = $"/collections/{collectionName}/items?datetime={datetimeRange}&limit=100";
-                var requestPath = $"/collections/{collectionName}/items?datetime={datetimeRange}&offset=0&limit=100&stationId=06194";
-                _logger.LogInformation("Fetching scans from DMI API: {Path}", requestPath);
+                //var now = DateTime.UtcNow;
+                //var tenMinutesAgo = now.AddMinutes(-10);
+                //var startTimeStr = tenMinutesAgo.ToString("o").Replace("+", "%2B");
+                //var endTimeStr = now.ToString("o").Replace("+", "%2B");
+                //var datetimeRange = $"{startTimeStr}/{endTimeStr}";
 
-                var result = await _httpClient.GetFromJsonAsync<DmiRadarScansResponse>("https://opendataapi.dmi.dk/v1/radardata/collections/pseudoCappi/items?datetime=2026-04-22T04:00:00Z", cancellationToken);
+                var _startTime = new DateTime(2026, 4, 22, 4, 0, 0, DateTimeKind.Utc);
+                var _endTime = new DateTime(2026, 4, 22, 4, 10, 0, DateTimeKind.Utc);
+                var _datetimeRange = $"{_startTime:o}/{_endTime:o}".Replace("+", "%2B");
+
+                //var datetimeRange = $"{startTime:yyyy-MM-ddTHH:mm:ssZ}/{endTime:yyyy-MM-ddTHH:mm:ssZ}";
+                var requestPath = $"collections/{collectionName}/items?datetime={_datetimeRange}&limit=100";
+                _logger.LogInformation("Final URL: {FullUrl}", _httpClient.BaseAddress + requestPath);
+                var result = await _httpClient.GetFromJsonAsync<DmiRadarScansResponse>(requestPath, cancellationToken);
 
                 if (result == null)
                 {

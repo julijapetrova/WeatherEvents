@@ -1,12 +1,12 @@
 ﻿namespace WeatherEvents.Queues
 {
-    public interface IDeadLetterQueue
+    public interface IDeadLetterQueue<T>
     {
         int Count { get; }
 
-        ValueTask EnqueueAsync(WeatherEventWorkItem weatherEventWorkItem);
+        ValueTask EnqueueAsync(T workItem);
 
-        ValueTask<WeatherEventWorkItem> DequeueAsync(
+        ValueTask<T> DequeueAsync(
             CancellationToken cancellationToken);
     }
 }
