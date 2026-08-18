@@ -5,13 +5,7 @@
 A weather data backend system demonstrating .NET API development, database modeling, and background processing.
 
 ## Architecture
-
-+---------------------+       +---------------------+       +---------------------+
-|                     |       |                     |       |                     |
-|  Weather Station    |------>|  WeatherEvents API  |------>|       Client        |
-|  (External Source)  |       |                     |       |                     |
-|                     |       |                     |       |                     |
-+---------------------+       +---------------------+       +---------------------+
+Weather Station → WeatherEvents API → Client (REST endpoints)
 
 Submit weather readings (e.g., temperature, humidity, pressure, wind speed) from weather stations via a `POST /weather-readings` endpoint.
 
