@@ -1,8 +1,7 @@
 # WeatherEvents
 
 ## What the Project Does
-**WeatherEvents** project is a **.NET 10.0** based **REST API** for processing weather station data. It allows users to:
-
+"This is a weather data backend system demonstrating .NET API development, database modeling, and background processing."
 ## Context Diagram
 ```plaintext
 +---------------------+       +---------------------+       +---------------------+
