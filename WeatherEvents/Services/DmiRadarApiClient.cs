@@ -32,8 +32,8 @@ namespace WeatherEvents.Services
             }
             // Find the most recent scan whose bbox contains our point
             var matchingScan = scans
-                //.Where(s => ContainsPoint(s.Geometry?.Bbox, latitude, longitude))
-                //.OrderByDescending(s => s.Properties.Datetime)
+                .Where(s => ContainsPoint(s.Geometry?.Bbox, latitude, longitude))
+                .OrderByDescending(s => s.Properties.Datetime)
                 .FirstOrDefault();
 
             if (matchingScan == null)

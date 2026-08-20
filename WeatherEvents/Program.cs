@@ -1,84 +1,131 @@
 using FluentValidation;
-using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations.Internal;
 using WeatherEvents.Data;
 using WeatherEvents.Queues;
 using WeatherEvents.Repositories;
 using WeatherEvents.Services;
 using WeatherEvents.Validators;
 using WeatherEvents.Workers;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+// MVC / API
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
 
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add DbContext to the service container
+// Database
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' is not configured.");
+
 builder.Services.AddDbContext<WeatherReadingDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
 
-// Queue needs to live for the lifetime of the application, therefore singleton
-builder.Services.AddSingleton<IWeatherEventQueue, InMemoryWeatherEventQueue>();
-builder.Services.AddSingleton<IDmiRadarEventQueue, InMemoryDmiRadarEventQueue>();
-builder.Services.AddSingleton<IDeadLetterQueue<RadarScanWorkItem>, InMemoryDeadLetterQueue<RadarScanWorkItem>>();
-builder.Services.AddSingleton<IDeadLetterQueue<WeatherEventWorkItem>, InMemoryDeadLetterQueue<WeatherEventWorkItem>>();
+// Queues
+builder.Services.AddSingleton<
+    IWeatherEventQueue,
+    InMemoryWeatherEventQueue>();
 
+builder.Services.AddSingleton<
+    IDmiRadarEventQueue,
+    InMemoryDmiRadarEventQueue>();
+
+builder.Services.AddSingleton<
+    IDeadLetterQueue<RadarScanWorkItem>,
+    InMemoryDeadLetterQueue<RadarScanWorkItem>>();
+
+builder.Services.AddSingleton<
+    IDeadLetterQueue<WeatherEventWorkItem>,
+    InMemoryDeadLetterQueue<WeatherEventWorkItem>>();
+
+// Workers
 builder.Services.AddHostedService<WeatherEventWorker>();
 builder.Services.AddHostedService<DmiRadarWorker>();
 
+// Repositories
 builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
 builder.Services.AddScoped<IRadarScanRepository, RadarScanRepository>();
 
+// DMI Radar API
 builder.Services.AddHttpClient<IDmiRadarApiClient, DmiRadarApiClient>(client =>
 {
-    var baseUrl = builder.Configuration["DmiRadarApi:BaseUrl"];
-    client.BaseAddress = new Uri(baseUrl ?? "https://opendataapi.dmi.dk/v1/radardata"); 
-    client.Timeout = TimeSpan.FromSeconds(30);
+    var baseUrl = builder.Configuration["DmiRadarApi:BaseUrl"]
+        ?? throw new InvalidOperationException(
+            "DmiRadarApi:BaseUrl is not configured.");
+
+    var timeoutSeconds = builder.Configuration.GetValue<int>(
+        "DmiRadarApi:TimeoutSeconds",
+        60);
+
+    if (timeoutSeconds <= 0)
+    {
+        throw new InvalidOperationException(
+            "DmiRadarApi:TimeoutSeconds must be greater than zero.");
+    }
+
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
 });
 
-// Add FluentValidation to the services
-builder.Services.AddValidatorsFromAssemblyContaining<WeatherEventRequestValidator>();
-builder.Configuration.AddEnvironmentVariables();
+// FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<
+    WeatherEventRequestValidator>();
+
 var app = builder.Build();
-// Auto - migrate database on startup
-try
-{
-    using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<WeatherReadingDbContext>();
-    Console.WriteLine("Attempting to migrate database...");
-    db.Database.Migrate(); // Creates DB + tables if they don't exist
-    Console.WriteLine("Database migration completed successfully.");
-}
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"Database migration error: {ex.Message}");
-    // Don't throw 
-}
+
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+// Development database migration
+if (app.Environment.IsDevelopment())
+{
+    try
+    {
+        using var scope = app.Services.CreateScope();
+
+        var db = scope.ServiceProvider
+            .GetRequiredService<WeatherReadingDbContext>();
+
+        logger.LogInformation("Attempting to migrate database...");
+
+        await db.Database.MigrateAsync();
+
+        logger.LogInformation(
+            "Database migration completed successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogCritical(
+            ex,
+            "Database migration failed.");
+
+        throw;
+    }
+}
 
 logger.LogInformation(
     "WeatherEvents API started successfully at {Time}",
     DateTime.UtcNow);
 
-// Configure the HTTP request pipeline.
+// HTTP pipeline
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UsePathBase("/swagger");
+else
+{
+    app.UseExceptionHandler();
+}
 
 app.UseHttpsRedirection();
 
@@ -87,26 +134,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-app.UseExceptionHandler(exceptionApp =>
-{
-    exceptionApp.Run(async context =>
-    {
-        var logger = context.RequestServices
-            .GetRequiredService<ILogger<Program>>();
-
-        var exceptionHandler =
-            context.Features.Get<IExceptionHandlerFeature>();
-
-        if (exceptionHandler?.Error != null)
-        {
-            logger.LogError(
-                exceptionHandler.Error,
-                "Unhandled exception occurred while processing request");
-        }
-
-        context.Response.StatusCode = 500;
-        await context.Response.WriteAsync(
-            "An unexpected error occurred.");
-    });
-});
