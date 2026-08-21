@@ -11,22 +11,32 @@ namespace WeatherEvents.Queues
         public int Count => _count;
         public InMemoryDmiRadarEventQueue()
         {
-          
-            _channel = Channel.CreateBounded<RadarScanWorkItem>(10000);
+            _channel = Channel.CreateBounded<RadarScanWorkItem>(
+            new BoundedChannelOptions(10_000)
+            {
+                FullMode = BoundedChannelFullMode.Wait,
+                SingleReader = true,
+                SingleWriter = false
+            });
+        }
+
+        public async ValueTask EnqueueAsync(RadarScanWorkItem workItem,
+        CancellationToken cancellationToken = default)
+        {
+            await _channel.Writer.WriteAsync(
+            workItem,
+            cancellationToken);
+
+            Interlocked.Increment(ref _count);
         }
         public async ValueTask<RadarScanWorkItem> DequeueAsync(CancellationToken cancellationToken)
         {
-            var radarScan = await _channel.Reader.ReadAsync(cancellationToken);
+            var workItem = await _channel.Reader.ReadAsync(
+            cancellationToken);
 
             Interlocked.Decrement(ref _count);
 
-            return radarScan;
-        }
-
-        public ValueTask EnqueueAsync(RadarScanWorkItem radarScanWorkItem)
-        {
-            Interlocked.Increment(ref _count);
-            return _channel.Writer.WriteAsync(radarScanWorkItem);
+            return workItem;
         }
     }
 }

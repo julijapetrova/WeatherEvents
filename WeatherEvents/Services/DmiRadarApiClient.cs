@@ -69,18 +69,8 @@ namespace WeatherEvents.Services
         {
             try
             {
-                //var now = DateTime.UtcNow;
-                //var tenMinutesAgo = now.AddMinutes(-10);
-                //var startTimeStr = tenMinutesAgo.ToString("o").Replace("+", "%2B");
-                //var endTimeStr = now.ToString("o").Replace("+", "%2B");
-                //var datetimeRange = $"{startTimeStr}/{endTimeStr}";
-
-                var _startTime = new DateTime(2026, 4, 22, 4, 0, 0, DateTimeKind.Utc);
-                var _endTime = new DateTime(2026, 4, 22, 4, 10, 0, DateTimeKind.Utc);
-                var _datetimeRange = $"{_startTime:o}/{_endTime:o}".Replace("+", "%2B");
-
-                //var datetimeRange = $"{startTime:yyyy-MM-ddTHH:mm:ssZ}/{endTime:yyyy-MM-ddTHH:mm:ssZ}";
-                var requestPath = $"collections/{collectionName}/items?datetime={_datetimeRange}&limit=100";
+                var datetimeRange = $"{startTime:yyyy-MM-ddTHH:mm:ssZ}/{endTime:yyyy-MM-ddTHH:mm:ssZ}";
+                var requestPath = $"collections/{collectionName}/items?datetime={datetimeRange}&limit=100";
                 _logger.LogInformation("Final URL: {FullUrl}", _httpClient.BaseAddress + requestPath);
                 var result = await _httpClient.GetFromJsonAsync<DmiRadarScansResponse>(requestPath, cancellationToken);
 

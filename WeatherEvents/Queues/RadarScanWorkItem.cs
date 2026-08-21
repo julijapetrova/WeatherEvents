@@ -4,7 +4,7 @@ namespace WeatherEvents.Queues
 {
     public class RadarScanWorkItem
     {
-        public RadarScan RadarScan { get; init; } = default!;
+        public required RadarScan RadarScan { get; init; };
 
         public int RetryCount { get; set; }
     }

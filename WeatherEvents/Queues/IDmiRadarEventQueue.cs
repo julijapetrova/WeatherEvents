@@ -6,9 +6,11 @@ namespace WeatherEvents.Queues
     public interface IDmiRadarEventQueue
     {
         int Count { get; }
+        ValueTask EnqueueAsync(
+                RadarScanWorkItem workItem,
+                CancellationToken cancellationToken = default);
 
-        ValueTask EnqueueAsync(RadarScanWorkItem radarScan);
-
-        ValueTask<RadarScanWorkItem> DequeueAsync(CancellationToken cancellationToken);
+        ValueTask<RadarScanWorkItem> DequeueAsync(
+            CancellationToken cancellationToken);
     }
 }

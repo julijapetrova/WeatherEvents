@@ -18,7 +18,7 @@ namespace WeatherEvents.Services
         Task<List<DmiRadarScanFeature>> GetScansAsync(
             DateTime startTime,
             DateTime endTime,
-            string collectionName = "pseudoCappi",
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default,
+            string collectionName = "pseudoCappi");
     }
 }
