@@ -10,7 +10,10 @@ namespace WeatherEvents.Services
         Task<DmiRadarScanFeature?> GetLatestScanForPointAsync(
             double latitude,
             double longitude,
-            string collectionName = "pseudoCappi");
+                        CancellationToken cancellationToken = default,
+                        string collectionName = "pseudoCappi"
+
+);
 
         /// <summary>
         /// Get all scans in a time range (for batch processing / pipeline)
@@ -19,6 +22,8 @@ namespace WeatherEvents.Services
             DateTime startTime,
             DateTime endTime,
             CancellationToken cancellationToken = default,
-            string collectionName = "pseudoCappi");
+            string collectionName = "pseudoCappi"
+
+            );
     }
 }

@@ -18,13 +18,19 @@ namespace WeatherEvents.Services
             _logger = logger ?? NullLogger<DmiRadarApiClient>.Instance;
             _httpClient = httpClient;
         }
-        public async Task<DmiRadarScanFeature?> GetLatestScanForPointAsync(double latitude = 0, double longitude = 0, string collectionName = "pseudoCappi")
+        public async Task<DmiRadarScanFeature?> GetLatestScanForPointAsync(
+            double latitude = 0,
+            double longitude = 0,
+            CancellationToken cancellationToken = default,
+            string collectionName = "pseudoCappi")
         {
 
             // Get scans from the last 15 minutes
             var now = DateTime.UtcNow;
-            var scans = await GetScansAsync(now.AddMinutes(-15), now, collectionName);
-
+            var scans = await GetScansAsync(
+                now.AddMinutes(-15),
+                now,
+                collectionName: collectionName);
             if (scans.Count == 0)
             {
                 _logger.LogWarning("No recent radar scans available");
@@ -62,10 +68,10 @@ namespace WeatherEvents.Services
                    lon >= minLon && lon <= maxLon;
         }
         public async Task<List<DmiRadarScanFeature>> GetScansAsync(
-            DateTime startTime,
-            DateTime endTime,
-            string collectionName = "pseudoCappi",
-            CancellationToken cancellationToken = default)
+    DateTime startTime,
+    DateTime endTime,
+    CancellationToken cancellationToken = default,
+    string collectionName = "pseudoCappi")
         {
             try
             {

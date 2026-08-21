@@ -1,4 +1,5 @@
-﻿using WeatherEvents.DTOs.DmiRadar;
+﻿using System.Collections;
+using WeatherEvents.DTOs.DmiRadar;
 using WeatherEvents.Models;
 using WeatherEvents.Queues;
 using WeatherEvents.Repositories;
@@ -86,7 +87,8 @@ public sealed class DmiRadarWorker : BackgroundService
         var scans = await _client.GetScansAsync(
             startTime,
             endTime,
-            cancellationToken);
+            cancellationToken
+            );
 
         foreach (var scan in scans)
         {
