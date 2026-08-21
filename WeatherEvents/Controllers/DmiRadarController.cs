@@ -1,10 +1,5 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using WeatherEvents.DTOs;
+﻿using Microsoft.AspNetCore.Mvc;
 using WeatherEvents.Queues;
-using WeatherEvents.Repositories;
 using WeatherEvents.Services;
 
 namespace WeatherEvents.Controllers

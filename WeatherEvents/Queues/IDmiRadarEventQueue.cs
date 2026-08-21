@@ -1,7 +1,4 @@
-﻿using WeatherEvents.DTOs.DmiRadar;
-using WeatherEvents.Models;
-
-namespace WeatherEvents.Queues
+﻿namespace WeatherEvents.Queues
 {
     public interface IDmiRadarEventQueue
     {

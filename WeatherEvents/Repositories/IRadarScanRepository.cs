@@ -1,5 +1,4 @@
 ﻿using WeatherEvents.Models;
-using WeatherEvents.Queues;
 
 public interface IRadarScanRepository
 {

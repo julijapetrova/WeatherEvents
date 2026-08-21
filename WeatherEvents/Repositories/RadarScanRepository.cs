@@ -40,7 +40,7 @@ namespace WeatherEvents.Repositories
                 var scan = await _context.RadarScans.FirstOrDefaultAsync(s => s.ScanId == scanId);
                 if (scan == null)
                 {
-                    _logger.LogWarning("No  scan found with ID {Id}.", scanId);
+                    _logger.LogDebug("No  scan found with ID {Id}.", scanId);
                 }
                 return scan;
             }
@@ -60,4 +60,3 @@ namespace WeatherEvents.Repositories
         }
     }
 }
-//COMMENT FOR AI 123

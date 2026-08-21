@@ -1,9 +1,7 @@
-﻿using Azure.Core;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
 using WeatherEvents.DTOs.DmiRadar;
-using WeatherEvents.Repositories;
-
+using System.Globalization;
 namespace WeatherEvents.Services
 {
     public class DmiRadarApiClient : IDmiRadarApiClient
@@ -29,11 +27,12 @@ namespace WeatherEvents.Services
             var now = DateTime.UtcNow;
             var scans = await GetScansAsync(
                 now.AddMinutes(-15),
-                now,
-                collectionName: collectionName);
+    now,
+    cancellationToken: cancellationToken,
+    collectionName: collectionName);
             if (scans.Count == 0)
             {
-                _logger.LogWarning("No recent radar scans available");
+                _logger.LogInformation("No recent radar scans available.");
                 return null;
             }
             // Find the most recent scan whose bbox contains our point
@@ -75,7 +74,8 @@ namespace WeatherEvents.Services
         {
             try
             {
-                var datetimeRange = $"{startTime:yyyy-MM-ddTHH:mm:ssZ}/{endTime:yyyy-MM-ddTHH:mm:ssZ}";
+                var datetimeRange =
+                    $"{FormatRfc3339(startTime)}/{FormatRfc3339(endTime)}";
                 var requestPath = $"collections/{collectionName}/items?datetime={datetimeRange}&limit=100";
                 _logger.LogInformation("Final URL: {FullUrl}", _httpClient.BaseAddress + requestPath);
                 var result = await _httpClient.GetFromJsonAsync<DmiRadarScansResponse>(requestPath, cancellationToken);
@@ -99,5 +99,12 @@ namespace WeatherEvents.Services
                 return new List<DmiRadarScanFeature>();
             }
         }
+        private static string FormatRfc3339(DateTime value)
+        {
+            return value.ToString(
+                "yyyy-MM-dd'T'HH':'mm':'ss'Z'",
+                CultureInfo.InvariantCulture);
+        }
     }
+
 }

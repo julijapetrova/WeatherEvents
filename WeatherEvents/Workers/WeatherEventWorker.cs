@@ -64,7 +64,8 @@ namespace WeatherEvents.Workers
 
                         _logger.LogError(
                           ex,
-                          "Moved weather event {SequenceNumber} to dead-letter queue after {RetryCount} attempts. Main queue: {MainQueueCount}, Dead-letter queue: {DeadLetterCount}",
+                          "Moved weather event {SequenceNumber} to dead-letter queue after {RetryCount} attempts. " +
+                          "Main queue: {MainQueueCount}, Dead-letter queue: {DeadLetterCount}",
                           workItem.WeatherEvent.SequenceNumber,
                           workItem.RetryCount,
                           _queue.Count,

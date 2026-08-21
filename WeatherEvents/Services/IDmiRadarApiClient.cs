@@ -10,8 +10,8 @@ namespace WeatherEvents.Services
         Task<DmiRadarScanFeature?> GetLatestScanForPointAsync(
             double latitude,
             double longitude,
-                        CancellationToken cancellationToken = default,
-                        string collectionName = "pseudoCappi"
+            CancellationToken cancellationToken = default,
+            string collectionName = "pseudoCappi"
 
 );
 

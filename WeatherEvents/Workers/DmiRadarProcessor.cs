@@ -1,48 +1,39 @@
-﻿using System.Collections;
-using WeatherEvents.DTOs.DmiRadar;
-using WeatherEvents.Models;
-using WeatherEvents.Queues;
-using WeatherEvents.Repositories;
+﻿using WeatherEvents.Queues;
 using WeatherEvents.Services;
 
 namespace WeatherEvents.Workers;
 
-public sealed class DmiRadarWorker : BackgroundService
+public sealed class DmiRadarProcessor : BackgroundService
 {
     private readonly IDeadLetterQueue<RadarScanWorkItem> _deadLetterQueue;
     private readonly IDmiRadarEventQueue _queue;
-    private readonly ILogger<DmiRadarWorker> _logger;
+    private readonly ILogger<DmiRadarProcessor> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IDmiRadarApiClient _client;
 
-    private static readonly TimeSpan PollInterval =
-        TimeSpan.FromMinutes(10);
+   
 
-    public DmiRadarWorker(
+    public DmiRadarProcessor(
         IServiceScopeFactory scopeFactory,
         IDmiRadarEventQueue queue,
         IDeadLetterQueue<RadarScanWorkItem> deadLetterQueue,
-        ILogger<DmiRadarWorker> logger,
-        IDmiRadarApiClient client)
+        ILogger<DmiRadarProcessor> logger
+        )
     {
         _deadLetterQueue = deadLetterQueue;
         _scopeFactory = scopeFactory;
         _queue = queue;
         _logger = logger;
-        _client = client;
     }
 
     protected override async Task ExecuteAsync(
         CancellationToken stoppingToken)
     {
-        _logger.LogInformation("DMI Radar Worker started.");
+        _logger.LogInformation("DMI Radar Processor started.");
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                await FetchAndEnqueueScansAsync(stoppingToken);
-
                 await ProcessQueuedScansAsync(stoppingToken);
             }
             catch (OperationCanceledException)
@@ -54,62 +45,13 @@ public sealed class DmiRadarWorker : BackgroundService
             {
                 _logger.LogError(
                     ex,
-                    "Unexpected error in DMI Radar Worker.");
-            }
-
-            try
-            {
-                await Task.Delay(
-                    PollInterval,
-                    stoppingToken);
-            }
-            catch (OperationCanceledException)
-                when (stoppingToken.IsCancellationRequested)
-            {
-                break;
+                    "Unexpected error in DMI Radar Processor.");
             }
         }
 
-        _logger.LogInformation("DMI Radar Worker stopped.");
+        _logger.LogInformation("DMI Radar Processor stopped.");
     }
 
-    private async Task FetchAndEnqueueScansAsync(
-        CancellationToken cancellationToken)
-    {
-        var endTime = DateTime.UtcNow;
-        var startTime = endTime.AddMinutes(-10);
-
-        _logger.LogInformation(
-            "Fetching DMI radar scans from {StartTime} to {EndTime}.",
-            startTime,
-            endTime);
-
-        var scans = await _client.GetScansAsync(
-            startTime,
-            endTime,
-            cancellationToken
-            );
-
-        foreach (var scan in scans)
-        {
-            var radarScan = ConvertToEntity(scan);
-
-            var workItem = new RadarScanWorkItem
-            {
-                RadarScan = radarScan,
-                RetryCount = 0
-            };
-
-            await _queue.EnqueueAsync(
-                workItem,
-                cancellationToken);
-        }
-
-        _logger.LogInformation(
-            "Enqueued {ScanCount} DMI radar scans. Queue count: {QueueCount}.",
-            scans.Count,
-            _queue.Count);
-    }
 
     private async Task ProcessQueuedScansAsync(
         CancellationToken cancellationToken)
@@ -187,7 +129,7 @@ public sealed class DmiRadarWorker : BackgroundService
         {
             _logger.LogWarning(
                 exception,
-                "Retry {RetryCount} for radar scan {ScanId}.",
+                "Retrying radar scan {ScanId}. Retry {RetryCount} of 2.",
                 workItem.RetryCount,
                 workItem.RadarScan.ScanId);
 
@@ -210,11 +152,4 @@ public sealed class DmiRadarWorker : BackgroundService
             _deadLetterQueue.Count);
     }
 
-    private static RadarScan ConvertToEntity(
-        DmiRadarScanFeature scan)
-    {
-        // We will implement this after looking at
-        // your actual DMI DTO and RadarScan model.
-        throw new NotImplementedException();
-    }
 }

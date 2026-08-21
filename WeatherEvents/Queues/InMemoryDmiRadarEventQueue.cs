@@ -1,6 +1,4 @@
 ﻿using System.Threading.Channels;
-using WeatherEvents.DTOs.DmiRadar;
-using WeatherEvents.Models;
 
 namespace WeatherEvents.Queues
 {

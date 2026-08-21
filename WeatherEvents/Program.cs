@@ -49,7 +49,8 @@ builder.Services.AddSingleton<
 
 // Workers
 builder.Services.AddHostedService<WeatherEventWorker>();
-builder.Services.AddHostedService<DmiRadarWorker>();
+builder.Services.AddHostedService<DmiRadarProcessor>();
+builder.Services.AddHostedService<DmiRadarPoller>();
 
 // Repositories
 builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
