@@ -20,8 +20,6 @@ namespace WeatherEvents.Repositories
             try
             {
                 _context.WeatherEvents.Add(reading);
-                //TODO: User doesn't need to wait for reading to be saved,
-                //background worker can take care of it
                 await _context.SaveChangesAsync();
                 _logger.LogInformation(
                     "Added weather reading: StationId={StationId}, Id={Id}",

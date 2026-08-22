@@ -11,7 +11,9 @@ namespace WeatherEvents.Workers
         private readonly IDmiRadarEventQueue _queue;
         private readonly IDmiRadarApiClient _client;
         private static readonly TimeSpan PollInterval =
-       TimeSpan.FromMinutes(10);
+            TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan LookbackWindow =
+            TimeSpan.FromMinutes(30);
         public DmiRadarPoller(
             IDmiRadarEventQueue queue,
             IDmiRadarApiClient client,
@@ -47,11 +49,11 @@ namespace WeatherEvents.Workers
             }
 
         }
-        private async Task FetchAndEnqueueScansAsync(
+        internal async Task FetchAndEnqueueScansAsync(
             CancellationToken cancellationToken)
         {
             var endTime = DateTime.UtcNow;
-            var startTime = endTime.AddMinutes(-30);
+            var startTime = endTime - LookbackWindow;
 
             _logger.LogInformation(
                 "Fetching DMI radar scans from {StartTime} to {EndTime}.",

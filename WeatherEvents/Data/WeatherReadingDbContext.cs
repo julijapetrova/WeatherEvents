@@ -32,5 +32,8 @@ public class WeatherReadingDbContext : DbContext
             entity.Property(e => e.Pressure).HasPrecision(7, 2);
             entity.Property(e => e.WindSpeed).HasPrecision(5, 2);
         });
+        modelBuilder.Entity<RadarScan>()
+            .HasIndex(r => r.ScanId)
+            .IsUnique();
     }
 }

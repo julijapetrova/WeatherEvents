@@ -91,12 +91,12 @@ namespace WeatherEvents.Services
             catch (HttpRequestException ex)
             {
                 _logger.LogError(ex, "HTTP request failed when fetching scans from DMI");
-                return new List<DmiRadarScanFeature>();
+                throw;
             }
             catch (JsonException ex)
             {
                 _logger.LogError(ex, "Failed to parse DMI API response");
-                return new List<DmiRadarScanFeature>();
+                throw;
             }
         }
         private static string FormatRfc3339(DateTime value)

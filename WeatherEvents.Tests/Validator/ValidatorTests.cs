@@ -1,8 +1,6 @@
 ﻿using FluentAssertions;
-using WeatherEvents.DTOs;
 using WeatherEvents.Tests.Helpers;
 using WeatherEvents.Validators;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WeatherEvents.Tests.Validator
 {
